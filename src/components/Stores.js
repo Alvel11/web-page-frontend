@@ -4,9 +4,12 @@ import axios from 'axios';
 import { Fab, Card, CardContent, Button, Typography, Grid } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
 import FileUpload from './FileUpload';
+import { useNavigate } from 'react-router-dom';
+
 
 const Stores = () => {
   const [stores, setStores] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchStores = async () => {
@@ -25,10 +28,10 @@ const Stores = () => {
   return (
       <div style={{ marginLeft: '220px', padding: '20px' }}>
         <Typography variant="h4" gutterBottom>
-          Stores
+          Tiendas
         </Typography>
         {stores.length === 0 ? (
-          <Typography variant="body1">No stores available.</Typography>
+          <Typography variant="body1">No hay tiendas disponibles.</Typography>
         ) : (
           <Grid container spacing={2}>
             {stores.map(store => (
@@ -40,7 +43,7 @@ const Stores = () => {
                       {store.ubication}
                     </Typography>
                     <Button variant="contained" color="primary" style={{ marginTop: '10px' }}>
-                      View Details
+                      Detalles
                     </Button>
                   </CardContent>
                 </Card>
@@ -48,8 +51,22 @@ const Stores = () => {
             ))}
           </Grid>
         )}
-        <FileUpload uploadUrl="http://localhost:8081/upload/tienda" />
+
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={() => navigate('/gestion-tiendas')}
+          style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            zIndex: 1000
+          }}
+        >
+          Gestion de Tiendas
+        </Button>
       </div>
+
     );
 };
 

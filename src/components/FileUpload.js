@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Fab } from '@mui/material';
+import { Fab, Button, Typography, Paper } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 const FileUpload = ({ uploadUrl }) => {
     const [file, setFile] = useState(null);
+    const [error, setError] = useState(null);
 
     const handleFileChange = (event) => {
         const selectedFile = event.target.files[0];
@@ -17,7 +18,6 @@ const FileUpload = ({ uploadUrl }) => {
     const handleUpload = async (fileToUpload) => {
         const formData = new FormData();
         formData.append('file', fileToUpload);
-
         try {
             const response = await axios.post(uploadUrl, formData, {
                 headers: {
@@ -30,26 +30,17 @@ const FileUpload = ({ uploadUrl }) => {
         }
     };
 
-    return (
-        <div>
-            <input
-                type="file"
-                accept=".xlsx, .xls"
-                id="upload-file"
-                style={{ display: 'none' }}
-                onChange={handleFileChange}
-            />
-            <label htmlFor="upload-file">
-                <Fab
-                    color="primary"
-                    aria-label="upload"
-                    component="span"
-                    style={{ position: 'absolute', bottom: '20px', right: '20px' }}
-                >
-                    <CloudUploadIcon />
-                </Fab>
-            </label>
-        </div>
+  return (
+    <Paper sx={{ p: 2, mb: 2 }}>
+      <Typography variant="h6" gutterBottom>Leer Excel</Typography>
+      <input
+        type="file"
+        accept=".xlsx, .xls"
+        onChange={handleFileChange}
+        style={{ marginTop: 8 }}
+      />
+      {error && <Typography color="error">{error}</Typography>}
+    </Paper>
     );
 };
 

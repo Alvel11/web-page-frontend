@@ -7,6 +7,8 @@ import Stores from './components/Stores';
 import Compras from './components/Compras';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
+import GestionDeTiendas from './components/GestionDeTiendas';
+import TransferManager from './components/TransferManager';
 
 const theme = createTheme({
   palette: {
@@ -30,6 +32,8 @@ const App = () => {
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/stores" element={<Stores />} />
                    <Route path="/compras" element={<Compras />} />
+                   <Route path="/gestion-tiendas" element={<GestionDeTiendas />} />
+                   <Route path="/transferencias" element={<TransferManager />} />
                 </Routes>
               </div>
             </Router>

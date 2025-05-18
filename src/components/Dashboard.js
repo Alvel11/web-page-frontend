@@ -115,7 +115,7 @@ const Dashboard = () => {
                 </TableHead>
                 <TableBody>
                   {ventasRecientes.map((venta) => (
-                    <TableRow key={venta.id}>
+                    <TableRow key={venta.idCompra}>
                       <TableCell>{venta.idCompra}</TableCell>
                       <TableCell>{new Date(venta.fecha).toLocaleDateString()}</TableCell>
                       <TableCell>${venta.precio.toFixed(2)}</TableCell>
