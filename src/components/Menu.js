@@ -14,6 +14,8 @@ import {
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import StoreIcon from '@mui/icons-material/Store';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 
 const drawerWidth = 220;
 
@@ -91,9 +93,22 @@ const Menu = () => {
             selected={location.pathname === '/transferencias'}
           >
             <ListItemIcon>
-              <ShoppingCartIcon />
+              <SwapHorizIcon />
             </ListItemIcon>
             <ListItemText primary="Tranferencias" />
+          </ListItemButton>
+        </ListItem>
+
+        <ListItem disablePadding>
+          <ListItemButton
+            component={Link}
+            to="/inventario-general"
+            selected={location.pathname === '/inventario-general'}
+          >
+            <ListItemIcon>
+              <InventoryIcon />
+            </ListItemIcon>
+            <ListItemText primary="Inventario" />
           </ListItemButton>
         </ListItem>
       </List>

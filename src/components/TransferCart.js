@@ -14,14 +14,14 @@ const TransferCart = ({ cart, onRemove }) => {
             <ListItem
               key={`${item.articulo.id}-${index}`}
               secondaryAction={
-                <IconButton edge="end" aria-label="delete" onClick={() => onRemove(index)}>
+                <IconButton edge="end" aria-label="eliminar" onClick={() => onRemove(index)}>
                   <DeleteIcon />
                 </IconButton>
               }
             >
               <ListItemText
-                primary={`${item.articulo.nombre} (${item.cantidad} Stk.)`}
-                secondary={`Verfügbar: ${item.maxDisponible}`}
+                primary={`${item.articulo.nombre} (${item.cantidad})`}
+                secondary={`Disponible: ${item.maxDisponible}`}
               />
             </ListItem>
           ))}

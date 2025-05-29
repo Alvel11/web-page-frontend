@@ -13,7 +13,7 @@ const TiendaDropdown = ({ selectedTienda, onChange, label }) => {
         setLoading(false);
       })
       .catch(error => {
-        console.error("Fehler beim Laden der Tiendas", error);
+        console.error("Error al cargar tiendas", error);
         setLoading(false);
       });
   }, []);

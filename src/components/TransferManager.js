@@ -1,51 +1,50 @@
+// src/components/TransferManager.js
 import React, { useState, useEffect } from 'react';
 import {
   Grid, Typography, Box, Button
 } from '@mui/material';
-import DropdownTiendas from './DropdownTiendas';  // Importiere die DropdownTiendas-Komponente
-import ArticuloSearch from './ArticuloSearch';
+import DropdownTiendas from './DropdownTiendas';
 import TransferCart from './TransferCart';
+import ArticuloTableWithAddButton from './ArticuloTableWithAddButton';
 
 const TransferManager = () => {
   const [tiendas, setTiendas] = useState([]);
   const [origenId, setOrigenId] = useState('');
   const [destinoId, setDestinoId] = useState('');
   const [cart, setCart] = useState([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     fetch('http://localhost:8081/tiendas')
       .then(res => res.json())
       .then(data => setTiendas(data))
-      .catch(err => console.error('Fehler beim Laden der Tiendas:', err));
+      .catch(err => console.error('Error al cargar tiendas:', err));
   }, []);
 
-  const handleAddArticulo = async (articulo) => {
+  const handleAddArticulo = (articulo) => {
     if (!origenId) {
-      alert('Bitte wähle zuerst ein Ursprungs-Geschäft.');
+      alert('Elige primero una tienda origen.');
       return;
     }
 
-    try {
-      const res = await fetch(`http://localhost:8081/inventario/${origenId}/${articulo.id}`);
-      const data = await res.json();
-
-      const cantidad = prompt(`Wie viele "${articulo.nombre}" willst du transferieren? (Max: ${data.cantidad})`);
-      const cantidadInt = parseInt(cantidad);
-
-      if (isNaN(cantidadInt) || cantidadInt < 1 || cantidadInt > data.cantidad) {
-        alert('Ungültige Menge.');
-        return;
-      }
-
-      setCart(prev => [...prev, {
-        articulo,
-        cantidad: cantidadInt,
-        maxDisponible: data.cantidad
-      }]);
-
-    } catch (e) {
-      console.error('Fehler beim Abrufen des Lagerbestands', e);
+    if (cart.find(item => item.articulo.idArticulo === articulo.idArticulo)) {
+      alert('Este articulo ya se encuentra en el carrito.');
+      return;
     }
+
+    const cantidad = prompt(`Cuantos "${articulo.nombre}" quiere transferir? (Max: ${articulo.cantidad})`);
+    const cantidadInt = parseInt(cantidad);
+
+    if (isNaN(cantidadInt) || cantidadInt < 1 || cantidadInt > articulo.cantidad) {
+      alert('Cantidad no valida.');
+      return;
+    }
+
+    setCart(prev => [...prev, {
+      articulo,
+      cantidad: cantidadInt,
+      maxDisponible: articulo.cantidad
+    }]);
   };
 
   const handleRemove = (index) => {
@@ -54,77 +53,80 @@ const TransferManager = () => {
 
   const handleTransfer = async () => {
     if (!origenId || !destinoId) {
-      alert('Bitte wähle sowohl ein Ursprungs- als auch ein Ziel-Geschäft.');
+      alert('Por favor elige tienda destino y origen.');
       return;
     }
 
     if (cart.length === 0) {
-      alert('Der Warenkorb ist leer. Bitte füge Artikel hinzu.');
+      alert('El carrito de compra esta vacio, por favor agrega articulos.');
       return;
     }
 
-    const transferData = cart.map(item => ({
-      articuloId: item.articulo.id,
-      cantidad: item.cantidad,
-      origenId: origenId,
-      destinoId: destinoId
-    }));
+    const solicitudTransferencia = {
+      tiendaOrigen: origenId,
+      tiendaDestino: destinoId,
+      transferencias: cart.map(item => ({
+        idArticulo: item.articulo.idArticulo,
+        cantidad: item.cantidad
+      }))
+    };
 
     try {
-      const response = await fetch('http://localhost:8081/transfer', {
+      const response = await fetch('http://localhost:8081/transferencia', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(transferData)
+        body: JSON.stringify(solicitudTransferencia)
       });
 
       if (response.ok) {
         alert('Transfer erfolgreich abgeschlossen!');
-        setCart([]); // Warenkorb nach erfolgreichem Transfer leeren
+        setCart([]); // Warenkorb leeren
+        setRefreshTrigger(prev => prev + 1);
       } else {
-        alert('Fehler beim Transfer. Bitte versuche es später noch einmal.');
+        alert('Error en la transferencia.');
       }
     } catch (error) {
       console.error('Fehler beim Transfer:', error);
-      alert('Fehler beim Transfer. Bitte versuche es später noch einmal.');
+      alert('Error en la transferencia.');
     }
   };
+
 
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h4" gutterBottom>Transferencias</Typography>
 
       <Grid container spacing={4}>
-        {/* Dropdown für Ursprungs- und Zielgeschäft */}
         <Grid item xs={12} sm={6}>
           <DropdownTiendas
             tiendas={tiendas}
-            label="Tienda origen"
+            label="Tienda Origen"
             value={origenId}
-            onChange={(value) => setOrigenId(value)}
+            onChange={setOrigenId}
           />
         </Grid>
-
         <Grid item xs={12} sm={6}>
           <DropdownTiendas
             tiendas={tiendas}
             label="Tienda Destino"
             value={destinoId}
-            onChange={(value) => setDestinoId(value)}
+            onChange={setDestinoId}
           />
         </Grid>
 
-        {/* Artikelsuche & Warenkorb */}
-        <Grid item xs={12} md={6}>
-          <ArticuloSearch onSelect={handleAddArticulo} />
-        </Grid>
-        <Grid item xs={12} md={6}>
+        {origenId && (
+          <Grid item xs={12}>
+            <ArticuloTableWithAddButton tiendaId={origenId} onAdd={handleAddArticulo} refreshTrigger={refreshTrigger} />
+          </Grid>
+        )}
+
+        <Grid item xs={12}>
           <TransferCart cart={cart} onRemove={handleRemove} />
         </Grid>
       </Grid>
 
-      {/* Transfer Button */}
       <Box sx={{ mt: 4 }}>
         <Button
           variant="contained"
@@ -132,7 +134,7 @@ const TransferManager = () => {
           onClick={handleTransfer}
           disabled={cart.length === 0 || !origenId || !destinoId}
         >
-          Transfer durchführen
+          Realizar transferencia
         </Button>
       </Box>
     </Box>

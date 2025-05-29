@@ -42,8 +42,12 @@ const Stores = () => {
                     <Typography variant="body2" color="textSecondary">
                       {store.ubication}
                     </Typography>
-                    <Button variant="contained" color="primary" style={{ marginTop: '10px' }}>
-                      Detalles
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      style={{ marginTop: '10px' }}
+                      onClick={() => navigate(`/tienda/${store.idTienda}/ventas`)}>
+                      Ventas
                     </Button>
                   </CardContent>
                 </Card>

@@ -9,6 +9,8 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import GestionDeTiendas from './components/GestionDeTiendas';
 import TransferManager from './components/TransferManager';
+import VentasTransferPage from './components/VentasTransferPage'
+import InventarioGeneral from './components/InventarioGeneral';
 
 const theme = createTheme({
   palette: {
@@ -34,6 +36,8 @@ const App = () => {
                    <Route path="/compras" element={<Compras />} />
                    <Route path="/gestion-tiendas" element={<GestionDeTiendas />} />
                    <Route path="/transferencias" element={<TransferManager />} />
+                   <Route path="/tienda/:tiendaId/ventas" element={<VentasTransferPage />} />
+                   <Route path="/inventario-general" element={<InventarioGeneral />} />
                 </Routes>
               </div>
             </Router>

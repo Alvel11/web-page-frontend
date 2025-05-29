@@ -1,20 +1,8 @@
-// src/components/Compras.js
 import React, { useEffect, useState } from 'react';
 import {
-  Box,
-  Grid,
-  Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  CircularProgress,
-  Paper,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
+  Box, Grid, Typography, FormControl, InputLabel, Select, MenuItem,
+  CircularProgress, Paper, Table, TableHead, TableRow, TableCell,
+  TableBody, TextField, TableContainer
 } from '@mui/material';
 import axios from 'axios';
 import FileUpload from './FileUpload';
@@ -26,7 +14,13 @@ const Compras = () => {
   const [batch, setBatch] = useState([]);
   const [compras, setCompras] = useState([]);
 
-  // Tiendas laden
+  const [batchFilter, setBatchFilter] = useState({
+    nombre: '', color: '', calidad: '', categoria: ''
+  });
+  const [comprasFilter, setComprasFilter] = useState({
+    idCompra: '', articulo: '', tienda: ''
+  });
+
   useEffect(() => {
     const fetchStores = async () => {
       try {
@@ -41,7 +35,6 @@ const Compras = () => {
     fetchStores();
   }, []);
 
-  // Excel-Daten und Historie beim Start laden
   useEffect(() => {
     fetchUploaded();
     fetchCompras();
@@ -72,6 +65,19 @@ const Compras = () => {
     fetchCompras();
   };
 
+  const filteredBatch = batch.filter(item =>
+    item.nombre?.toLowerCase().includes(batchFilter.nombre.toLowerCase()) &&
+    item.color?.toLowerCase().includes(batchFilter.color.toLowerCase()) &&
+    item.calidad?.toLowerCase().includes(batchFilter.calidad.toLowerCase()) &&
+    item.categoria?.toLowerCase().includes(batchFilter.categoria.toLowerCase())
+  );
+
+  const filteredCompras = compras.filter(item =>
+    item.idCompra.toString().includes(comprasFilter.idCompra) &&
+    item.articulo?.toLowerCase().includes(comprasFilter.articulo.toLowerCase()) &&
+    item.tienda?.toLowerCase().includes(comprasFilter.tienda.toLowerCase())
+  );
+
   return (
     <Box sx={{ ml: '220px', p: 4 }}>
       <Typography variant="h4" gutterBottom>Compras</Typography>
@@ -90,7 +96,6 @@ const Compras = () => {
                 onChange={handleStoreChange}
                 displayEmpty
                 renderValue={selectedStore !== '' ? undefined : () => ''}
-                sx={{ minWidth: 240 }}
               >
                 <MenuItem value="">
                   <em>Elegir tienda</em>
@@ -107,44 +112,74 @@ const Compras = () => {
           {selectedStore && (
             <FileUpload
               uploadUrl={`http://localhost:8081/upload/compra/${selectedStore}`}
-              onUploadSuccess={() => fetchUploaded()}
+              onUploadSuccess={fetchUploaded}
             />
           )}
 
           <Box sx={{ mt: 4 }}>
             <Typography variant="h5" gutterBottom>Carga de excel más reciente</Typography>
             <Paper>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Nombre</TableCell>
-                    <TableCell>Color</TableCell>
-                    <TableCell>Calidad</TableCell>
-                    <TableCell>Categoría</TableCell>
-                    <TableCell align="right">Precio</TableCell>
-                    <TableCell align="right">Cantidad</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {batch.map((row, idx) => (
-                    <TableRow key={idx}>
-                      <TableCell>{row.nombre}</TableCell>
-                      <TableCell>{row.color}</TableCell>
-                      <TableCell>{row.calidad}</TableCell>
-                      <TableCell>{row.categoria}</TableCell>
-                      <TableCell align="right">{row.precio}</TableCell>
-                      <TableCell align="right">{row.cantidad}</TableCell>
-                    </TableRow>
-                  ))}
-                  {batch.length === 0 && (
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
                     <TableRow>
-                      <TableCell colSpan={6} align="center">
-                        Keine Datensätze gefunden.
+                      <TableCell>
+                        <TextField
+                          variant="standard"
+                          label="Nombre"
+                          value={batchFilter.nombre}
+                          onChange={(e) => setBatchFilter({ ...batchFilter, nombre: e.target.value })}
+                        />
                       </TableCell>
+                      <TableCell>
+                        <TextField
+                          variant="standard"
+                          label="Color"
+                          value={batchFilter.color}
+                          onChange={(e) => setBatchFilter({ ...batchFilter, color: e.target.value })}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <TextField
+                          variant="standard"
+                          label="Calidad"
+                          value={batchFilter.calidad}
+                          onChange={(e) => setBatchFilter({ ...batchFilter, calidad: e.target.value })}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <TextField
+                          variant="standard"
+                          label="Categoría"
+                          value={batchFilter.categoria}
+                          onChange={(e) => setBatchFilter({ ...batchFilter, categoria: e.target.value })}
+                        />
+                      </TableCell>
+                      <TableCell align="right">Precio</TableCell>
+                      <TableCell align="right">Cantidad</TableCell>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                  </TableHead>
+                  <TableBody>
+                    {filteredBatch.map((row, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell>{row.nombre}</TableCell>
+                        <TableCell>{row.color}</TableCell>
+                        <TableCell>{row.calidad}</TableCell>
+                        <TableCell>{row.categoria}</TableCell>
+                        <TableCell align="right">{row.precio}</TableCell>
+                        <TableCell align="right">{row.cantidad}</TableCell>
+                      </TableRow>
+                    ))}
+                    {filteredBatch.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={6} align="center">
+                          Keine Datensätze gefunden.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </Paper>
           </Box>
         </Grid>
@@ -153,33 +188,58 @@ const Compras = () => {
         <Grid item xs={12} md={8}>
           <Typography variant="h6" gutterBottom>Historial de Compras</Typography>
           <Paper>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Id</TableCell>
-                  <TableCell>Articulo</TableCell>
-                  <TableCell>Tienda</TableCell>
-                  <TableCell>Cantidad</TableCell>
-                  <TableCell align="right">Precio</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {compras.map((compra, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{compra.idCompra}</TableCell>
-                    <TableCell>{compra.articulo}</TableCell>
-                    <TableCell>{compra.tienda}</TableCell>
-                    <TableCell>{compra.cantidad}</TableCell>
-                    <TableCell align="right">{compra.precio}</TableCell>
-                  </TableRow>
-                ))}
-                {compras.length === 0 && (
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
                   <TableRow>
-                    <TableCell colSpan={5} align="center">Keine Käufe gefunden.</TableCell>
+                    <TableCell>
+                      <TextField
+                        variant="standard"
+                        label="Id"
+                        value={comprasFilter.idCompra}
+                        onChange={(e) => setComprasFilter({ ...comprasFilter, idCompra: e.target.value })}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        variant="standard"
+                        label="Articulo"
+                        value={comprasFilter.articulo}
+                        onChange={(e) => setComprasFilter({ ...comprasFilter, articulo: e.target.value })}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        variant="standard"
+                        label="Tienda"
+                        value={comprasFilter.tienda}
+                        onChange={(e) => setComprasFilter({ ...comprasFilter, tienda: e.target.value })}
+                      />
+                    </TableCell>
+                    <TableCell>Cantidad</TableCell>
+                    <TableCell align="right">Precio</TableCell>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {filteredCompras.map((compra, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{compra.idCompra}</TableCell>
+                      <TableCell>{compra.articulo}</TableCell>
+                      <TableCell>{compra.tienda}</TableCell>
+                      <TableCell>{compra.cantidad}</TableCell>
+                      <TableCell align="right">{compra.precio}</TableCell>
+                    </TableRow>
+                  ))}
+                  {filteredCompras.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} align="center">
+                        Keine Käufe gefunden.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Paper>
         </Grid>
       </Grid>
